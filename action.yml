@@ -1,6 +1,8 @@
 name: 'Flutter mama 👵'
 description: 'Checks for tests and code structure'
 author: 'crossplatformsweden'
+icon: bell
+color: yellow
 
 outputs:
   missingTests:
@@ -11,6 +13,3 @@ outputs:
 runs:
   using: 'node16'
   main: 'dist/index.js'
-
-Icon: bell
-Color: yellow
