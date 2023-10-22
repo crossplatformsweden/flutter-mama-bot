@@ -52,8 +52,8 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Print Output
         run: |
           echo "Missing Tests: ${{ steps.check-tests.outputs.missingTests }}"

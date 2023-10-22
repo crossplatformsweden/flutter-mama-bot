@@ -8,11 +8,6 @@ outputs:
   missingArray:
     description: 'JSON array of missing test files information'
 
-inputs:
-  github_token:
-    description: 'GitHub token for authentication'
-    required: true
-
 runs:
   using: 'node16'
   main: 'dist/index.js'
