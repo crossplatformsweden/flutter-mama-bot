@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { createActionAuth } from "@octokit/auth-action";
+import { createActionAuth } from '@octokit/auth-action'
 
 interface MissingTest {
   originalPath: string
@@ -13,8 +13,8 @@ interface MissingTest {
 
 export async function run(): Promise<void> {
   try {
-    const auth = createActionAuth();
-    const authentication = await auth();
+    const auth = createActionAuth()
+    const authentication = await auth()
     const octokit = github.getOctokit(authentication.token)
 
     const { repo, owner, number: issue_number } = github.context.issue
