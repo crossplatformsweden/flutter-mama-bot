@@ -15,11 +15,9 @@ interface MissingTest {
 
 export async function run(): Promise<void> {
   const missingTests: MissingTest[] = []
-
+  const libPath = path.join(process.cwd(), 'lib')
+  const testPath = path.join(process.cwd(), 'test')
   try {
-    const libPath = path.join(process.cwd(), 'lib')
-    const testPath = path.join(process.cwd(), 'test')
-
     const checkFiles = async (
       dir: string,
       isViewOrWidgetFolder: boolean
@@ -37,19 +35,22 @@ export async function run(): Promise<void> {
           }
         } else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
           const relativePath = path.relative(libPath, filePath)
-          const testFilePath = path.join(testPath, relativePath.replace('.dart', '_test.dart'))
+          const testFilePath = path.join(
+            testPath,
+            relativePath.replace('.dart', '_test.dart')
+          )
           const testPathRelative = path.relative(testPath, testFilePath)
-          
+
           try {
             await fs.access(testFilePath)
           } catch {
             const originalPath = filePath
-            const testPath = testFilePath
+            const testPath2 = testFilePath
             const fileName = path.basename(originalPath)
-            const testFileName = path.basename(testPath)
+            const testFileName = path.basename(testPath2)
             missingTests.push({
               originalPath,
-              testPath,
+              testPath: testPath2,
               fileName,
               testFileName,
               relativePath,
