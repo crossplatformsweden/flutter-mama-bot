@@ -93,9 +93,9 @@ export async function run(): Promise<void> {
       const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
         .map(
           test =>
-            `- [ ] \`${test.fileName}\` (Test file: \`${test.testFileName}\`, Path: [\`lib/${test.relativePath}\`](./lib/${test.relativePath}))`
+            `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\``
         )
-        .join('\n')}`
+        .join('\n\n')}`
 
       if (mamaComment) {
         if (mamaComment.body !== commentBody) {

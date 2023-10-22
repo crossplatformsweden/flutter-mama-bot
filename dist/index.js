@@ -29905,8 +29905,8 @@ async function run() {
                 labels: [labelName]
             });
             const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
-                .map(test => `- [ ] \`${test.fileName}\` (Test file: \`${test.testFileName}\`, Path: [\`lib/${test.relativePath}\`](./lib/${test.relativePath}))`)
-                .join('\n')}`;
+                .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\``)
+                .join('\n\n')}`;
             if (mamaComment) {
                 if (mamaComment.body !== commentBody) {
                     await octokit.rest.issues.updateComment({
