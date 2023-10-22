@@ -29844,40 +29844,47 @@ const path_1 = __importDefault(__nccwpck_require__(1017));
 const auth_action_1 = __nccwpck_require__(20);
 async function run() {
     const missingTests = [];
+    const libPath = path_1.default.join(process.cwd(), 'lib');
+    const testPath = path_1.default.join(process.cwd(), 'test');
     try {
-        const libPath = path_1.default.join(process.cwd(), 'lib');
-        const checkFiles = async (dir) => {
+        const checkFiles = async (dir, isViewOrWidgetFolder) => {
             const files = await fs_1.promises.readdir(dir);
             for (const file of files) {
                 const filePath = path_1.default.join(dir, file);
                 const stat = await fs_1.promises.stat(filePath);
                 if (stat.isDirectory()) {
-                    await checkFiles(filePath);
+                    if (file === 'view' || file === 'widget') {
+                        await checkFiles(filePath, true);
+                    }
+                    else {
+                        await checkFiles(filePath, isViewOrWidgetFolder);
+                    }
                 }
-                else if (file.endsWith('.dart')) {
+                else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
                     const relativePath = path_1.default.relative(libPath, filePath);
-                    const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
-                    console.log({ testFilePath });
+                    const testFilePath = path_1.default.join(testPath, relativePath.replace('.dart', '_test.dart'));
+                    const testPathRelative = path_1.default.relative(testPath, testFilePath);
                     try {
                         await fs_1.promises.access(testFilePath);
                     }
                     catch {
-                        console.log(`Missing test file for ${filePath}`);
                         const originalPath = filePath;
-                        const testPath = testFilePath;
+                        const testPath2 = testFilePath;
                         const fileName = path_1.default.basename(originalPath);
-                        const testFileName = path_1.default.basename(testPath);
+                        const testFileName = path_1.default.basename(testPath2);
                         missingTests.push({
                             originalPath,
-                            testPath,
+                            testPath: testPath2,
                             fileName,
-                            testFileName
+                            testFileName,
+                            relativePath,
+                            testPathRelative
                         });
                     }
                 }
             }
         };
-        await checkFiles(libPath);
+        await checkFiles(libPath, false);
         console.log({ missingTests });
         const auth = (0, auth_action_1.createActionAuth)();
         const authentication = await auth();
@@ -29901,8 +29908,8 @@ async function run() {
                 labels: [labelName]
             });
             const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
-                .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})`)
-                .join('\n')}`;
+                .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\`\n  Test path: \`test/${test.testPathRelative}\``)
+                .join('\n\n')}`;
             if (mamaComment) {
                 if (mamaComment.body !== commentBody) {
                     await octokit.rest.issues.updateComment({

@@ -9,49 +9,59 @@ interface MissingTest {
   testPath: string
   fileName: string
   testFileName: string
+  relativePath: string
+  testPathRelative: string
 }
 
 export async function run(): Promise<void> {
   const missingTests: MissingTest[] = []
-
+  const libPath = path.join(process.cwd(), 'lib')
+  const testPath = path.join(process.cwd(), 'test')
   try {
-    const libPath = path.join(process.cwd(), 'lib')
-
-    const checkFiles = async (dir: string): Promise<void> => {
+    const checkFiles = async (
+      dir: string,
+      isViewOrWidgetFolder: boolean
+    ): Promise<void> => {
       const files = await fs.readdir(dir)
       for (const file of files) {
         const filePath = path.join(dir, file)
         const stat = await fs.stat(filePath)
+
         if (stat.isDirectory()) {
-          await checkFiles(filePath)
-        } else if (file.endsWith('.dart')) {
+          if (file === 'view' || file === 'widget') {
+            await checkFiles(filePath, true)
+          } else {
+            await checkFiles(filePath, isViewOrWidgetFolder)
+          }
+        } else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
           const relativePath = path.relative(libPath, filePath)
           const testFilePath = path.join(
-            process.cwd(),
-            'test',
+            testPath,
             relativePath.replace('.dart', '_test.dart')
           )
-          console.log({ testFilePath })
+          const testPathRelative = path.relative(testPath, testFilePath)
+
           try {
             await fs.access(testFilePath)
           } catch {
-            console.log(`Missing test file for ${filePath}`)
             const originalPath = filePath
-            const testPath = testFilePath
+            const testPath2 = testFilePath
             const fileName = path.basename(originalPath)
-            const testFileName = path.basename(testPath)
+            const testFileName = path.basename(testPath2)
             missingTests.push({
               originalPath,
-              testPath,
+              testPath: testPath2,
               fileName,
-              testFileName
+              testFileName,
+              relativePath,
+              testPathRelative
             })
           }
         }
       }
     }
 
-    await checkFiles(libPath)
+    await checkFiles(libPath, false)
     console.log({ missingTests })
 
     const auth = createActionAuth()
@@ -83,8 +93,12 @@ export async function run(): Promise<void> {
       })
 
       const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
-        .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})`)
-        .join('\n')}`
+        .map(
+          test =>
+            `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\`\n  Test path: \`test/${test.testPathRelative}\``
+        )
+        .join('\n\n')}`
+
       if (mamaComment) {
         if (mamaComment.body !== commentBody) {
           await octokit.rest.issues.updateComment({
