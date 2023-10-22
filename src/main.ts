@@ -10,6 +10,7 @@ interface MissingTest {
   fileName: string
   testFileName: string
   relativePath: string
+  testPathRelative: string
 }
 
 export async function run(): Promise<void> {
@@ -17,6 +18,7 @@ export async function run(): Promise<void> {
 
   try {
     const libPath = path.join(process.cwd(), 'lib')
+    const testPath = path.join(process.cwd(), 'test')
 
     const checkFiles = async (
       dir: string,
@@ -35,11 +37,9 @@ export async function run(): Promise<void> {
           }
         } else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
           const relativePath = path.relative(libPath, filePath)
-          const testFilePath = path.join(
-            process.cwd(),
-            'test',
-            relativePath.replace('.dart', '_test.dart')
-          )
+          const testFilePath = path.join(testPath, relativePath.replace('.dart', '_test.dart'))
+          const testPathRelative = path.relative(testPath, testFilePath)
+          
           try {
             await fs.access(testFilePath)
           } catch {
@@ -52,7 +52,8 @@ export async function run(): Promise<void> {
               testPath,
               fileName,
               testFileName,
-              relativePath
+              relativePath,
+              testPathRelative
             })
           }
         }
@@ -93,7 +94,7 @@ export async function run(): Promise<void> {
       const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
         .map(
           test =>
-            `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\``
+            `- [ ] ${test.fileName} (Test file: ${test.testFileName})\n  Path: \`lib/${test.relativePath}\`\n  Test path: \`test/${test.testPathRelative}\``
         )
         .join('\n\n')}`
 
