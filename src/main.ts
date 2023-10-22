@@ -9,6 +9,7 @@ interface MissingTest {
   testPath: string
   fileName: string
   testFileName: string
+  relativePath: string
 }
 
 export async function run(): Promise<void> {
@@ -27,7 +28,6 @@ export async function run(): Promise<void> {
         const stat = await fs.stat(filePath)
 
         if (stat.isDirectory()) {
-          // If the current directory is "view" or "widget", set isViewOrWidgetFolder to true
           if (file === 'view' || file === 'widget') {
             await checkFiles(filePath, true)
           } else {
@@ -40,11 +40,9 @@ export async function run(): Promise<void> {
             'test',
             relativePath.replace('.dart', '_test.dart')
           )
-          console.log({ testFilePath })
           try {
             await fs.access(testFilePath)
           } catch {
-            console.log(`Missing test file for ${filePath}`)
             const originalPath = filePath
             const testPath = testFilePath
             const fileName = path.basename(originalPath)
@@ -53,7 +51,8 @@ export async function run(): Promise<void> {
               originalPath,
               testPath,
               fileName,
-              testFileName
+              testFileName,
+              relativePath
             })
           }
         }
@@ -91,17 +90,13 @@ export async function run(): Promise<void> {
         labels: [labelName]
       })
 
-      const commentBody = `
-      ${commentMarker}
+      const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
+        .map(
+          test =>
+            `- [ ] \`${test.fileName}\` (Test file: \`${test.testFileName}\`, Path: [\`lib/${test.relativePath}\`](./lib/${test.relativePath}))`
+        )
+        .join('\n')}`
 
-      ### Missing Test Files:
-      
-      \`\`\`
-      ${missingTests
-        .map(test => `📄 ${test.originalPath}\n   └─ 🚫 ${test.testFileName}`)
-        .join('\n')}
-      \`\`\`
-      `
       if (mamaComment) {
         if (mamaComment.body !== commentBody) {
           await octokit.rest.issues.updateComment({
