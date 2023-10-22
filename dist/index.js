@@ -29843,12 +29843,8 @@ const fs_1 = __nccwpck_require__(7147);
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const auth_action_1 = __nccwpck_require__(20);
 async function run() {
+    const missingTests = [];
     try {
-        const auth = (0, auth_action_1.createActionAuth)();
-        const authentication = await auth();
-        const octokit = github.getOctokit(authentication.token);
-        const { repo, owner, number: issue_number } = github.context.issue;
-        const missingTests = [];
         const libPath = path_1.default.join(process.cwd(), 'lib');
         const checkFiles = async (dir) => {
             const files = await fs_1.promises.readdir(dir);
@@ -29861,10 +29857,12 @@ async function run() {
                 else if (file.endsWith('.dart')) {
                     const relativePath = path_1.default.relative(libPath, filePath);
                     const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
+                    console.log({ testFilePath });
                     try {
                         await fs_1.promises.access(testFilePath);
                     }
                     catch {
+                        console.log(`Missing test file for ${filePath}`);
                         const originalPath = filePath;
                         const testPath = testFilePath;
                         const fileName = path_1.default.basename(originalPath);
@@ -29880,6 +29878,11 @@ async function run() {
             }
         };
         await checkFiles(libPath);
+        console.log({ missingTests });
+        const auth = (0, auth_action_1.createActionAuth)();
+        const authentication = await auth();
+        const octokit = github.getOctokit(authentication.token);
+        const { repo, owner, number: issue_number } = github.context.issue;
         const commentMarker = '👵 Flutter Mama';
         const comments = await octokit.rest.issues.listComments({
             owner,

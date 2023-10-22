@@ -12,14 +12,9 @@ interface MissingTest {
 }
 
 export async function run(): Promise<void> {
+  const missingTests: MissingTest[] = []
+
   try {
-    const auth = createActionAuth()
-    const authentication = await auth()
-    const octokit = github.getOctokit(authentication.token)
-
-    const { repo, owner, number: issue_number } = github.context.issue
-
-    const missingTests: MissingTest[] = []
     const libPath = path.join(process.cwd(), 'lib')
 
     const checkFiles = async (dir: string): Promise<void> => {
@@ -36,10 +31,11 @@ export async function run(): Promise<void> {
             'test',
             relativePath.replace('.dart', '_test.dart')
           )
-
+          console.log({ testFilePath })
           try {
             await fs.access(testFilePath)
           } catch {
+            console.log(`Missing test file for ${filePath}`)
             const originalPath = filePath
             const testPath = testFilePath
             const fileName = path.basename(originalPath)
@@ -56,6 +52,13 @@ export async function run(): Promise<void> {
     }
 
     await checkFiles(libPath)
+    console.log({ missingTests })
+
+    const auth = createActionAuth()
+    const authentication = await auth()
+    const octokit = github.getOctokit(authentication.token)
+
+    const { repo, owner, number: issue_number } = github.context.issue
 
     const commentMarker = '👵 Flutter Mama'
     const comments = await octokit.rest.issues.listComments({
