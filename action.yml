@@ -12,4 +12,5 @@ runs:
   using: 'node16'
   main: 'dist/index.js'
 
-icon: bell
+Icon: bell
+Color: yellow
