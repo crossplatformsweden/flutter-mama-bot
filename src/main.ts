@@ -82,9 +82,17 @@ export async function run(): Promise<void> {
         labels: [labelName]
       })
 
-      const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
-        .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})`)
-        .join('\n')}`
+      const commentBody = `
+      ${commentMarker}
+
+      ### Missing Test Files:
+      
+      \`\`\`
+      ${missingTests
+        .map(test => `📄 ${test.originalPath}\n   └─ 🚫 ${test.testFileName}`)
+        .join('\n')}
+      \`\`\`
+      `;
       if (mamaComment) {
         if (mamaComment.body !== commentBody) {
           await octokit.rest.issues.updateComment({
