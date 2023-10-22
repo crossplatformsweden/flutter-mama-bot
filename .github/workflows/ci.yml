@@ -53,8 +53,8 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 1000
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Print Output
-        id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run: |
+          echo "Missing Tests: ${{ steps.check-tests.outputs.missingTests }}"
+          echo "Missing Array: ${{ steps.check-tests.outputs.missingArray }}"
