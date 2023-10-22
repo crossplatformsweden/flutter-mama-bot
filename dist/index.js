@@ -29846,15 +29846,21 @@ async function run() {
     const missingTests = [];
     try {
         const libPath = path_1.default.join(process.cwd(), 'lib');
-        const checkFiles = async (dir) => {
+        const checkFiles = async (dir, isViewOrWidgetFolder) => {
             const files = await fs_1.promises.readdir(dir);
             for (const file of files) {
                 const filePath = path_1.default.join(dir, file);
                 const stat = await fs_1.promises.stat(filePath);
                 if (stat.isDirectory()) {
-                    await checkFiles(filePath);
+                    // If the current directory is "view" or "widget", set isViewOrWidgetFolder to true
+                    if (file === 'view' || file === 'widget') {
+                        await checkFiles(filePath, true);
+                    }
+                    else {
+                        await checkFiles(filePath, isViewOrWidgetFolder);
+                    }
                 }
-                else if (file.endsWith('.dart')) {
+                else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
                     const relativePath = path_1.default.relative(libPath, filePath);
                     const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
                     console.log({ testFilePath });
@@ -29877,7 +29883,7 @@ async function run() {
                 }
             }
         };
-        await checkFiles(libPath);
+        await checkFiles(libPath, false);
         console.log({ missingTests });
         const auth = (0, auth_action_1.createActionAuth)();
         const authentication = await auth();
@@ -29900,9 +29906,17 @@ async function run() {
                 issue_number,
                 labels: [labelName]
             });
-            const commentBody = `${commentMarker}\n\n### Missing Test Files:\n${missingTests
-                .map(test => `- [ ] ${test.fileName} (Test file: ${test.testFileName})`)
-                .join('\n')}`;
+            const commentBody = `
+      ${commentMarker}
+
+      ### Missing Test Files:
+      
+      \`\`\`
+      ${missingTests
+                .map(test => `📄 ${test.originalPath}\n   └─ 🚫 ${test.testFileName}`)
+                .join('\n')}
+      \`\`\`
+      `;
             if (mamaComment) {
                 if (mamaComment.body !== commentBody) {
                     await octokit.rest.issues.updateComment({

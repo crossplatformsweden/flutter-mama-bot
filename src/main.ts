@@ -17,14 +17,23 @@ export async function run(): Promise<void> {
   try {
     const libPath = path.join(process.cwd(), 'lib')
 
-    const checkFiles = async (dir: string): Promise<void> => {
+    const checkFiles = async (
+      dir: string,
+      isViewOrWidgetFolder: boolean
+    ): Promise<void> => {
       const files = await fs.readdir(dir)
       for (const file of files) {
         const filePath = path.join(dir, file)
         const stat = await fs.stat(filePath)
+
         if (stat.isDirectory()) {
-          await checkFiles(filePath)
-        } else if (file.endsWith('.dart')) {
+          // If the current directory is "view" or "widget", set isViewOrWidgetFolder to true
+          if (file === 'view' || file === 'widget') {
+            await checkFiles(filePath, true)
+          } else {
+            await checkFiles(filePath, isViewOrWidgetFolder)
+          }
+        } else if (file.endsWith('.dart') && isViewOrWidgetFolder) {
           const relativePath = path.relative(libPath, filePath)
           const testFilePath = path.join(
             process.cwd(),
@@ -51,7 +60,7 @@ export async function run(): Promise<void> {
       }
     }
 
-    await checkFiles(libPath)
+    await checkFiles(libPath, false)
     console.log({ missingTests })
 
     const auth = createActionAuth()
@@ -92,7 +101,7 @@ export async function run(): Promise<void> {
         .map(test => `📄 ${test.originalPath}\n   └─ 🚫 ${test.testFileName}`)
         .join('\n')}
       \`\`\`
-      `;
+      `
       if (mamaComment) {
         if (mamaComment.body !== commentBody) {
           await octokit.rest.issues.updateComment({
