@@ -16,15 +16,20 @@ export async function run(): Promise<void> {
 
   try {
     const libPath = path.join(process.cwd(), 'lib')
+    const folders = (process.env.FOLDERS || 'lib').split(',')
 
     const checkFiles = async (dir: string): Promise<void> => {
       const files = await fs.readdir(dir)
       for (const file of files) {
         const filePath = path.join(dir, file)
         const stat = await fs.stat(filePath)
+        const dirName = path.dirname(filePath)
         if (stat.isDirectory()) {
           await checkFiles(filePath)
-        } else if (file.endsWith('.dart') && file.includes('widgets')) {
+        } else if (
+          file.endsWith('.dart') &&
+          folders.includes(path.basename(dirName))
+        ) {
           const relativePath = path.relative(libPath, filePath)
           const testFilePath = path.join(
             process.cwd(),

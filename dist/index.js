@@ -29846,15 +29846,18 @@ async function run() {
     const missingTests = [];
     try {
         const libPath = path_1.default.join(process.cwd(), 'lib');
+        const folders = (process.env.FOLDERS || 'lib').split(',');
         const checkFiles = async (dir) => {
             const files = await fs_1.promises.readdir(dir);
             for (const file of files) {
                 const filePath = path_1.default.join(dir, file);
                 const stat = await fs_1.promises.stat(filePath);
+                const dirName = path_1.default.dirname(filePath);
                 if (stat.isDirectory()) {
                     await checkFiles(filePath);
                 }
-                else if (file.endsWith('.dart')) {
+                else if (file.endsWith('.dart') &&
+                    folders.includes(path_1.default.basename(dirName))) {
                     const relativePath = path_1.default.relative(libPath, filePath);
                     const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
                     console.log({ testFilePath });
