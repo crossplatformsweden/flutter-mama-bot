@@ -23,6 +23,8 @@ Add the following step to your GitHub Actions workflow:
 ```yaml
 - name: Flutter Mama 👵
   uses: crossplatformsweden/flutter-mama-bot@1.0
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Outputs
@@ -64,6 +66,8 @@ jobs:
 
       - name: Flutter Mama 👵
         uses: crossplatformsweden/flutter-mama-bot@1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ## Support and Contributions
