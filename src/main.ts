@@ -16,7 +16,7 @@ export async function run(): Promise<void> {
 
   try {
     const libPath = path.join(process.cwd(), 'lib')
-    const folders = (process.env.FOLDERS || '').split(',')
+    const folders = (process.env.FOLDERS || 'lib').split(',')
 
     const checkFiles = async (dir: string): Promise<void> => {
       const files = await fs.readdir(dir)

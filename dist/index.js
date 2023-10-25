@@ -29846,7 +29846,7 @@ async function run() {
     const missingTests = [];
     try {
         const libPath = path_1.default.join(process.cwd(), 'lib');
-        const folders = (process.env.FOLDERS || '').split(',');
+        const folders = (process.env.FOLDERS || 'lib').split(',');
         const checkFiles = async (dir) => {
             const files = await fs_1.promises.readdir(dir);
             for (const file of files) {
