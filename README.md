@@ -25,6 +25,7 @@ Add the following step to your GitHub Actions workflow:
   uses: crossplatformsweden/flutter-mama-bot@1.0
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    FOLDERS: widgets,components,modules
 ```
 
 ## Outputs
@@ -68,6 +69,7 @@ jobs:
         uses: crossplatformsweden/flutter-mama-bot@1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FOLDERS: widgets,components,modules
 ```
 
 ## Support and Contributions
