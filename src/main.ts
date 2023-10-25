@@ -16,6 +16,8 @@ export async function run(): Promise<void> {
 
   try {
     const libPath = path.join(process.cwd(), 'lib')
+    const folders = (process.env.FOLDERS || '').split(',');
+
 
     const checkFiles = async (dir: string): Promise<void> => {
       const files = await fs.readdir(dir)
@@ -27,7 +29,7 @@ export async function run(): Promise<void> {
           await checkFiles(filePath)
         } else if (
           file.endsWith('.dart') &&
-          path.basename(dirName) == 'widgets'
+          folders.includes(path.basename(dirName))
         ) {
           const relativePath = path.relative(libPath, filePath)
           const testFilePath = path.join(

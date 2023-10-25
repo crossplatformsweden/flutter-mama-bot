@@ -57,6 +57,7 @@ jobs:
         uses: ./
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FOLDERS: widgets,components,modules
       - name: Print Output
         run: |
           echo "Missing Tests: ${{ steps.check-tests.outputs.missingTests }}"
