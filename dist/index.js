@@ -29851,10 +29851,11 @@ async function run() {
             for (const file of files) {
                 const filePath = path_1.default.join(dir, file);
                 const stat = await fs_1.promises.stat(filePath);
+                const dirName = path_1.default.dirname(filePath);
                 if (stat.isDirectory()) {
                     await checkFiles(filePath);
                 }
-                else if (file.endsWith('.dart')) {
+                else if (file.endsWith('.dart') && path_1.default.basename(dirName)) {
                     const relativePath = path_1.default.relative(libPath, filePath);
                     const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
                     console.log({ testFilePath });
