@@ -25,7 +25,10 @@ export async function run(): Promise<void> {
         const dirName = path.dirname(filePath)
         if (stat.isDirectory()) {
           await checkFiles(filePath)
-        } else if (file.endsWith('.dart') && path.basename(dirName)) {
+        } else if (
+          file.endsWith('.dart') &&
+          path.basename(dirName) == 'widgets'
+        ) {
           const relativePath = path.relative(libPath, filePath)
           const testFilePath = path.join(
             process.cwd(),

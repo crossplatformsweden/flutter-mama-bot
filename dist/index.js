@@ -29855,7 +29855,8 @@ async function run() {
                 if (stat.isDirectory()) {
                     await checkFiles(filePath);
                 }
-                else if (file.endsWith('.dart') && path_1.default.basename(dirName)) {
+                else if (file.endsWith('.dart') &&
+                    path_1.default.basename(dirName) == 'widgets') {
                     const relativePath = path_1.default.relative(libPath, filePath);
                     const testFilePath = path_1.default.join(process.cwd(), 'test', relativePath.replace('.dart', '_test.dart'));
                     console.log({ testFilePath });
