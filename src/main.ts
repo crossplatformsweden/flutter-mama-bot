@@ -22,7 +22,7 @@ export async function run(): Promise<void> {
       for (const file of files) {
         const filePath = path.join(dir, file)
         const stat = await fs.stat(filePath)
-        const dirName = path.dirname(filePath); 
+        const dirName = path.dirname(filePath)
         if (stat.isDirectory()) {
           await checkFiles(filePath)
         } else if (file.endsWith('.dart') && path.basename(dirName)) {
